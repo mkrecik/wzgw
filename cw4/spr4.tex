@@ -1,0 +1,685 @@
+\documentclass[fleqn,10pt,a4paper]{article}
+\usepackage{polski}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry} 
+\usepackage{enumerate}
+\usepackage{sidecap}
+\usepackage{wrapfig}
+\usepackage{subfig}
+\usepackage{fancyhdr}
+\usepackage{multirow}
+\usepackage{gensymb}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{verbatim}
+\usepackage{media9}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{booktabs}
+
+% Define custom colors
+\definecolor{mygreen}{RGB}{127,148,0}
+\definecolor{mygray}{RGB}{80,80,80}
+\definecolor{mymauve}{RGB}{251,98,246}
+\definecolor{myblue}{RGB}{0, 166, 237}
+\definecolor{myorange}{RGB}{246, 81, 29}
+
+% Define a custom style for your code
+\lstdefinestyle{mycode}{
+  backgroundcolor=\color{white},
+  commentstyle=\color{mygreen},
+  keywordstyle=\color{myblue},
+  numberstyle=\tiny\color{black},
+  stringstyle=\color{myorange},
+  basicstyle=\ttfamily\small\color{mygray},
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=t,
+  keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=true,
+  tabsize=2,
+  frame=single
+}
+
+
+\lstset{
+  backgroundcolor=\color{white},
+  literate={ą}{{\k{a}}}1 {ć}{{\'c}}1 {ę}{{\k{e}}}1 {ł}{{\l}}1 {ń}{{\'n}}1 {ó}{{\'o}}1 {ś}{{\'s}}1 {ź}{{\'z}}1 {ż}{{\.z}}1
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  filecolor=magenta,      
+  urlcolor=cyan,
+}
+
+\hypersetup{breaklinks=true}
+\urlstyle{same}
+\renewcommand{\lstlistingname}{Kod źródłowy}
+\renewcommand{\lstlistlistingname}{Spis kodów źródłowych}
+\renewcommand{\figurename}{Rysunek}
+\renewcommand{\listfigurename}{Spis rysunków}
+
+\makeatletter
+\renewcommand{\maketitle}{%
+  \begin{titlepage}
+    \begin{center}
+      \vspace*{2cm}
+      {\huge \@title \par}
+      \vspace{1.5cm}
+      {\large \@author \\ nr 1, gr. 2 \\ 325693 \par}
+      \vspace{1.5cm}
+      {\large Wydział Geodezji i Kartografii\\ Politechnika Warszawska \par}
+      \vspace{11cm}
+      {\large \@date \par}
+      \vspace{1.5cm}
+    \end{center}
+  \end{titlepage}
+}
+\makeatother
+    \title{\textbf{SPRAWOZDANIE Z ĆWICZENIA 4:}\\ Odwzorowanie Gaussa-Krügera: układy współrzędnych
+    płaskich stosowanych w Polsce}
+\author{Maja Kret}
+\date{Warszawa, \today}
+
+
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+\linespread{1.3}
+
+
+\begin{document}
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\maketitle
+\rhead{~}
+
+\tableofcontents
+\newpage
+
+\section{Cel ćwiczenia}
+Celem ćwiczenia jest transformacja współrzędnych geodezyjnych punktów do
+układów współrzędnych płaskich stosowanych w Polsce.
+Następnie należy wyznaczyć długości, azymuty odcinków oraz pole trapezu
+złożonego z tych odcinków.
+
+\section{Wstęp teoretyczny}
+
+\subsection{Układ współrzędnych płaskich PL-2000}
+Odwzorowanie Gaussa-Krügera elipsoidy globalnej WGS84. Układ składa się z 4 stref numerowanych od 5 do 8.
+Każda ze stref obejmuje trzystopniowy pas. 
+Stosowany na potrzeby wykonania map w skali większej niż 1:10 000. Zniekształcenia oscylują w obrębie wartości 
+$-7,7 cm/km$ do $+7 cm/km$
+Współrzędne analizowane w tym ćwiczeniu zawierają się w strefie 5 z południkiem osiowym 15\degree.
+
+\subsection{Układ współrzędnych płaskich PL-1992}
+Odwzorowanie Gaussa-Krügera elipsoidy lokalnej GR80. Układ ten jest jednolity i obejmuje cały obszar Polski.
+Południkiem środkowym jest południk 19\degree, a skala podobieństwa wynosi 0.9993. Zniekształcenie na 
+południku osiowym wynosi $-70 cm/km$, a an skrajnie wschodnich obszarach kraju dochodzi do $+90 cm/km$.
+Ze względu na duże wartości zniekształceń
+stosowany jest do map w skali 1:10 000 i mniejszych.
+
+\subsection{Układ współrzędnych płaskich UTM}
+Universal Transverse Mercator - uniwersalne poprzeczne odwzorowanie Merkatora jest stosowane na całym świecie
+do celów nawigacyjnych i wojskowych. Jest do odwzorowanie w pasach 6\degree, ze skalą na południku środkowym 0.9996.
+Polska znajduje się w pasach 33, 34 i 35. 
+
+\subsection{Układ współrzędnych płaskich LAEA}
+Lambert Azimuthal Equal Area - układ współrzędnych płaskich utworzony na podstawie przyporządkowania punktów na elipsoidzie
+GRS80 według teorii azymutalnego odwzorowania Lamberta.
+Układ LAEA używany jest w mapach o skalach 1:500 000 i mniejszych. Jest dobry do pomiaru długości i powierzchni, 
+ale nieodpowiedni do pomiaru kątów i kierunków.
+
+\subsection{Układ współrzędnych płaskich LCC}
+Lambert Conformal Conic jest opary na odwzorowaniu stożkowym Lamberta. Stosowany jest na potrzeby wydawania map w skalach 1:500 000 i mniejszych
+gdy ważne jest zachowanie prawdziwego kształtu. Nadaje się do pomiarów kątów i kierunków, ale nie do pomiaru długości i powierzchni.
+
+\section{Dane do ćwiczenia}
+\vspace*{1cm}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    Układ      & EPSG  & Zakres             \\ \hline
+    PL-2000    & 2176  & Polska - strefa 5  \\
+    PL-1992    & 2180  & Polska             \\
+    UTM        & 32633 & Świat - strefa 33 \\
+    LAEA       & 3035  & Europa             \\
+    LCC        & 3034  & Europa             \\
+    \hline
+  \end{tabular}
+  \caption{Układy współrzędnych płaskich i ich kod EPSG
+  \label{tab:uklady}}
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    nr & $\varphi$                  & $\lambda$                  \\ \hline
+    1  & $53\degree 45' 00.00000''$ & $15\degree 15' 00.00000''$ \\
+    2  & $54\degree 06' 33.75763''$ & $15\degree 15' 00.00000''$ \\
+    3  & $54\degree 05' 58.80144''$ & $16\degree 46' 43.41406''$ \\
+    4  & $53\degree 44' 25.04170''$ & $16\degree 46' 43.41406''$ \\
+    \hline
+  \end{tabular}
+  \caption{Współrzędne analizowanych punktów
+    \label{tab:punkty}}
+\end{table}
+
+
+\justify
+\section{Przebieg ćwiczenia}
+
+
+\begin{enumerate}
+  \item \textbf{Transformacje współrzędnych: } Wszystkie współrzędne zostały poddane transformacji 
+  do układów współrzędnych płaskich za pomocą biblioteki pyproj (kod źródłowy \ref{kod:transformacje}).
+  Metoda przeliczenia bazuje na kodach EPSG układu wejściowego i wyjściowego i zwraca wynik w metrach.
+  \item \textbf{Redukcje długości: } Dokonano redukcji długości (kod źródłowy \ref{kod:redukcje}), więc dokonano obliczeń:
+  \begin{enumerate}
+    \item długości odcinków na płaszczyźnie układu PL-2000
+    \item długości odcinków na płaszczyźnie Gaussa-Krügera
+    \item redukcji długości
+    \item ostatecznej długości na elipsoidzie.
+  \end{enumerate}
+  \item \textbf{Redukcje azymutów: } Dokonano redukcji azymutów (kod źródłowy \ref{kod:redukcje}), dokonując obliczeń:
+  \begin{enumerate}
+    \item kątów kierunkowych w współrzędnych płaskich
+    \item zbieżności południków
+    \item redukcji kierunków
+    \item ostatecznego azymutu na elipsoidzie.
+  \end{enumerate}
+  \item \textbf{Pole trapezu: } Pole powierzchni zostało obliczone za pomocą wzorów Gaussa (kod źródłowy \ref{kod:transformacje})
+  dla wszystkich analizowanych układów współrzędnych.
+  \item \textbf{Stworzenie tabel: } Wszystkie grupy danych zostały zapisane do tabel biblioteki \texttt{pandas}
+   w celu dodania do sprawozdania.
+\end{enumerate}
+
+\section{Wyniki ćwiczenia}
+
+\subsection{Transformacje z biblioteką pyproj}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    nr & x           & y           \\ \hline
+    1  & 5516490.727 & 5957660.601 \\
+    2  & 5516349.663 & 5997657.405 \\
+    3  & 5616347.760 & 5998010.911 \\
+    4  & 5617351.461 & 5958019.885 \\
+    \hline
+  \end{tabular}
+  \caption{Współrzędne punktów w układzie PL-2000}
+  \label{tab:2000}
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    nr & x          & y          \\
+    \hline
+    1  & 252846.028 & 660446.270 \\
+    2  & 254962.295 & 700391.989 \\
+    3  & 354799.469 & 695092.080 \\
+    4  & 353546.705 & 655129.270 \\
+    \hline
+  \end{tabular}
+  \caption{Współrzędne punktów w układzie PL-1992}
+  \label{tab:1992}
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    nr & x           & y          \\
+    \hline
+    1  & 516485.400 & 5955736.129 \\
+    2  & 516344.382  & 5995720.012 \\
+    3  & 616310.177 & 5996073.405\\
+    4  & 617313.554 & 5956095.297\\
+    \hline
+  \end{tabular}
+  \caption{Współrzędne punktów w układzie UTM}
+  \label{tab:utm}
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    nr & x           & y           \\
+    \hline
+    1  & 4667032.566 & 3417280.404 \\
+    2  & 4664091.927 & 3457181.890 \\
+    3  & 4763796.950 & 3464409.230 \\
+    4  & 4767591.881 & 3424568.613 \\
+    \hline
+  \end{tabular}
+  \caption{Współrzędne punktów w układzie LAEA}
+  \label{tab:laea}
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    nr & x           & y           \\
+    \hline
+    1  & 4334584.794 & 3000070.553 \\
+    2  & 4331838.799 & 3038655.338 \\
+    3  & 4428320.820 & 3045476.812 \\
+    4  & 4431864.387 & 3006957.453 \\
+    \hline
+  \end{tabular}
+  \caption{Współrzędne punktów w układzie LCC}
+  \label{tab:lcc}
+\end{table}
+
+Tabele \ref{tab:2000} -\ref{tab:lcc} przedstawiają współrzędne punktów czworokąta w układach współrzędnych płaskich 
+obowiązujących w Polsce. Współrzędne wyrażone są w metrach i zostały obliczone za pomocą biblioteki pyproj.
+
+\subsection{Redukcje długości}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    Układ & Dł. dana $[m]$ & poprawka [cm/km] & poprawka względna [cm] & poprawka względna [m] \\
+    \hline
+    \multirow{2}{*}{PL- 2000}   & 40000.000   & $-7,7 - +7$   & $-308 - +280 $  & $-3.08 -+2.80 $   \\
+                                & 100000.000  & $-7,7 - +7$   & $-770 - +700$   & $ -7.70 - +7.00$      \\ \hline
+    \multirow{2}{*}{PL-1992}    & 40000.000   & $-70 - +90$   & $-2800 -+3600$  & $ -28.00 - +36.00$  \\
+                                & 100000.000  & $-70 - +90$   & $-7000 -+9000$  & $ -70.00 - +90.00$   \\
+    \hline
+  \end{tabular}
+  \caption{Oczekiwane oscylacje w współrzędnych}
+  \label{tab:redukcje}
+\end{table}
+
+W tabeli \ref{tab:redukcje} przedstawiono zniekształcenia współrzędnych w obrębie jednej strefy w układzie PL-2000.
+Analizowane punkty 3 i 4 przechodzą już na strefę 6, co oznacza, że zniekształcenie 
+długości do i od tych punktów może być większe. Najmniejszych zniekształceń można się spodziewać przy linii
+1 - 2, która całkowicie leży wewnątrz, ale nie w samym środku strefy 5.
+
+W tabeli zawarto również zniekształcenia długości dla układu PL-2000.
+Pomiędzy południkami $15\degree$ a $17 \degree$ spodziewamy się zniekształceń w obrębie 0 do -40 cm na km.
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    A-B & Dł. dane & Dł.Vincenty & PL-2000 & PL-1992 \\
+    \hline
+    1 - 2 & 40000.000 & 40000.000 & 40000.020 & 40018.352 \\
+    2 - 3 & 100000.000 & 100000.000 & 100006.118 & 100019.479 \\
+    3 - 4 & 40000.000 & 40000.000 & 40006.588 & 39999.022 \\
+    4 - 1 & 100000.000 & 100862.551 & 100868.882 & 100882.559 \\
+    \hline
+  \end{tabular}
+  \caption{Długości odcinków na elipsoidzie}
+  \label{tab:dl}
+\end{table}
+
+W tabeli \ref{tab:dl} dokonano porównania długości linii w kolumnach przedstawiających kolejno:
+\begin{enumerate}
+  \item Długości linii dane w ćwiczeniu 3
+  \item Długości linii zamkniętego trapezu obliczonych w ćwiczeniu 3 za pomocą algorytmu Vincentego 
+  \item Długości zredukowane z płaszczyzny układu PL-2000 na elipsoidę
+  \item Długości zredukowane z płaszczyzny układu PL-1992 na elipsoidę
+\end{enumerate}
+
+
+\subsection{Redukcje azymutów}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    A-B    & Az. dany    &Az. Kivioj        & Az. Vincenty  A-B          & Az. Vincenty B-A \\
+    \hline
+    1 - 2 & $  0\degree 00' 00.00000''$ & $  0\degree 00' 00.00000''$  & $  0\degree 00' 00.00000''$ & $180\degree 00' 00.00000''$ \\
+    2 - 3 & $ 90\degree 00' 00.00000''$ & $ 91\degree 14' 18.34038''$  & $ 90\degree 00' 00.00000''$ & $271\degree 14' 18.34038''$ \\
+    3 - 4 & $180\degree 00' 00.00000''$ & $ 180\degree 00' 00.00000''$ & $180\degree 00' 00.00000''$  & $360\degree 00' 00.00000''$ \\
+    4 - 1 & $270\degree 00' 00.00000''$ & $ 269\degree 59' 51.09899''$ & $271\degree 13'49.11409''$   & $ 89\degree 59' 51.09899''$ \\
+    \hline
+  \end{tabular}
+  \caption{Azymuty odcinków z ćwiczenia 3}
+  \label{tab:az3}
+\end{table}
+
+Tabela \ref{tab:az3} przedstawia azymuty dane w ćwiczeniu 3 oraz te wyliczone za pomocą algorytmu Kivioja i Vincentego.
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    A-B    & Azymut A-B               & Azymut B-A      \\
+    \hline
+    1 - 2 & $ 90\degree 24' 11.77172''$  & $ 270\degree 24'17.45732''$  \\
+    2 - 3 & $  0\degree 26' 53.23813''$  & $ 180\degree 21'55.40451''$  \\
+    3 - 4 & $ 272\degree 52'47.13538''$ & $  92\degree 52' 13.50021''$  \\
+    4 - 1 & $181\degree 20'10.55727''$ & $   2\degree 00' 03.55518''$  \\
+    \hline
+  \end{tabular}
+  \caption{Azymuty odcinków w układzie PL-2000}
+  \label{tab:az2000}
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    nr    & Azymut A-B               & Azymut B-A  \\
+    \hline
+    1 - 2 & $87\degree 10' 31.05466''$  & $267\degree 09'58.51621'' $ \\
+    2 - 3 & $357\degree 12'31.12435''$  & $177\degree 07' 23.71614''$ \\
+    3 - 4 & $269\degree 38'38.92025''$ & $89\degree 38' 27.86829'' $ \\
+    4 - 1 & $178\degree 06' 26.67372''$ & $358\degree 46'36.23174''$  \\
+    \hline
+  \end{tabular}
+  \caption{Azymuty odcinków w układzie PL-1992}
+  \label{tab:az1992}
+\end{table}
+
+W wartościach azymutów w tabelach \ref{tab:az2000} i \ref{tab:az1992} występują odstępstwa na poziomie od 
+$30''$ do $2 \degree$.
+
+
+\subsection{Pole trapezu}
+
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    Układ & Pole $[m^2]$ & Pole $[km^2]$\\
+    \hline
+    WGS 84 & 4016880873.853 & 4016.881 \\
+    PL-2000 & 4016769500.134 & 4016.770 \\
+    PL-1992 & 4015113362.314 & 4015.113 \\
+    UTM & 4014174886.310 & 4014.175 \\
+    LAEA & 4016817517.040 & 4016.818 \\
+    LCC & 3756510722.070 & 3756.511 \\
+    \hline
+  \end{tabular}
+  \caption{Pole powierzchni w układach współrzędnych płaskich}
+  \label{tab:area_epsg}
+\end{table}
+
+W tabeli \ref{tab:area_epsg} przedstawiono wyniki obliczeń pól powierzchni dla układów współrzędnych płaskich.
+Wszystkie obliczenia zostały wykonane za pomocą metody Gaussa. Pierwszy wiersz przedstawia pole obliczone w ramach ćwiczenia 3,
+które uzyskano z użyciem funkcji \texttt{geometry\_area\_perimeter}.
+Najbardziej zbliżone wyniki uzyskano dla układów PL-2000 i LAEA.
+Wynik dla układu LCC jest najbardziej odległy od pozostałych. Jest to spowodowane stożkowym sposobem odwzorowania
+powierzchni na płaszczyznę, które nie zachowuje powierzchni ani odległości.
+
+\section{Wnioski}
+Na wybór układu współrzędnych płaskich wpływa wiele czynników.
+Dla Polski, obowiązującym i najdokładniejszym jest układ PL-2000, ale przy mapach w skali 1:10 000 i mniejszych zalecany jest układ PL-1992.
+Układy LAEA i LCC są stosowane w całej Europie i stanowią ważny element systemu odniesień przestrzennych.
+Układ UTM jest uniwersalny i stosowany na całym świecie. 
+
+Warto zwrócić uwagę na odstępstwa w obliczonych długościach i polach powierzchni, które są spowodowane odwzorowaniem 
+ich na płaszczyznę. Na ich dokładność będzie bezpośrednio wpływać wybór układu współrzędnych płaskich.
+Innym aspektem są azymuty, które przy odwzorowaniu Gaussa-Krügera mogą być zniekształcone nawet o ponad $1 \degree$.
+Takie błędy mogą mieć duży wpływ na pomiary kątów i kierunków.
+
+
+\newpage 
+\section{Kod źródłowy}
+
+\begin{lstlisting}[language=Python, caption=Zamiany jednostek kątowych, label = kod:katy, style = mycode]
+  degree_sign = u"\N{DEGREE SIGN}"
+  # Radiany na stopnie, minuty, sekundy
+  def rad2dms(rad):
+      dd = np.rad2deg(rad)
+      dd = dd
+      deg = int(np.trunc(dd))
+      mnt = int(np.trunc((dd-deg) * 60))
+      sec = ((dd-deg) * 60 - mnt) * 60
+      mnt = abs(mnt)
+      sec = abs(sec)
+      if sec > 59.99999:
+          sec = 0
+          mnt += 1
+      if sec < 10:
+          sec = f"0{sec:.5f}"
+      else:
+          sec = f"{sec:.5f}"
+      if mnt < 10:
+          mnt = f"0{mnt}"
+      dms = (f"{deg}{degree_sign} {mnt}' {sec}''")
+      return dms
+
+  # Stopnie dziesiętne na stopnie, minuty, sekundy
+  def deg2dms(dd):
+      deg = int(np.trunc(dd))
+      mnt = int(np.trunc((dd-deg) * 60))
+      sec = ((dd-deg) * 60 - mnt) * 60
+      mnt = abs(mnt)
+      sec = abs(sec)
+      if sec < 10:
+          sec = f"0{sec:.5f}"
+      else:
+          sec = f"{sec:.5f}"
+      if mnt < 10:
+          mnt = f"0{mnt}"
+      dms = (f"{deg}{degree_sign} {mnt}' {sec}''")
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language=Python, caption=Transformacje współrzędnych i pole powierzchni, label = kod:transformacje, style = mycode]
+  import numpy as np
+  from pyproj import Proj, transform, CRS, Transformer, Geod
+  import plotly.graph_objects as go
+  import plotly.io as pio
+  import matplotlib.pyplot as plt
+  import pandas as pd
+  from shapely.geometry import LineString, Point, Polygon
+
+  # Kody układów współrzędnych
+  input_code = 4326
+  output_names = ['PL-2000', 'PL-92', 'UTM', 'LAEA', 'LCC']
+  output_codes = [2176, 2180, 32633, 3035, 3034]
+  
+  input_proj = CRS.from_epsg(4326)
+  proj_2000 = CRS.from_epsg(2176)
+  proj_92 = CRS.from_epsg(2180)
+  proj_utm = CRS.from_epsg(32633)
+  proj_laea = CRS.from_epsg(3035)
+  proj_lcc = CRS.from_epsg(3034)
+  
+  output_projections = [proj_2000, proj_92, proj_utm, proj_laea, proj_lcc]
+  
+  # Współrzędne punktów
+  phis = [53.75, 54.10937712005116, 54.099667067097876, 53.74028936233757] 
+  lambdas = [15.25, 15.25, 16.778726126645378, 16.778726126645378]
+  lamb0 = np.radians(15)
+  
+  x1_out, x2_out, x3_out, x4_out = [], [], [], []
+  y1_out, y2_out, y3_out, y4_out = [], [], [], []
+  
+  x_out = [x1_out, x2_out, x3_out, x4_out]
+  y_out = [y1_out, y2_out, y3_out, y4_out]
+  
+  # Pętla transformacji
+  for proj in output_codes:
+      for i in range(4):
+          transformer = Transformer.from_crs(input_code, proj)
+          y, x = transformer.transform(phis[i], lambdas[i])
+          x_out[i].append(x)
+          y_out[i].append(y)
+
+          P2176 = 0
+          P2180 = 0
+          P32633 = 0
+          P3035 = 0
+          P3034 = 0
+          
+          areas_epsg = [P2176, P2180, P32633, P3035, P3034]
+          P2176_con = 0
+          P2180_con = 0
+          P32633_con = 0
+          P3035_con = 0
+          P3034_con = 0
+          areas_con_epsg = [P2176_con, P2180_con, P32633_con, P3035_con, P3034_con]
+          
+          # Pętla pola powierzchni
+          for u in range(5):
+              for i in range(4):
+                  # kij
+                  j = (i + 1) % 4
+                  k = (i - 1) % 4
+                  # Gauss
+                  area = x_out[i][u] * (y_out[j][u] - y_out[k][u])
+                  area_con = y_out[i][u] * (x_out[j][u] - x_out[k][u])
+                  areas_epsg[u] += area
+                  areas_con_epsg[u] += area_con
+          
+          areas_epsg = [round(abs(areas_epsg[i] / 2), 3) for i in range(5)]
+          areas_con_epsg = [round(abs(areas_con_epsg[i] / 2), 3) for i in range(5)]
+  
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Redukcje odległości i azymutów, label = kod:redukcje, style=mycode]
+  # Parametry elipsoidy 
+  a = 6378137.0 
+  a2 = a ** 2
+  e2 = 0.00669438002290
+  b2 = a2 * (1 - e2)
+  e22 = (a2- b2)  / b2
+
+  # Współczynnik zniekształcenia
+  m2000 = 0.999923
+  m1992 = 0.9993
+
+  # Promienie krzywizny
+  def M_and_N(phi):
+      sin_phi = np.sin(phi)
+      M = a * (1 - e2) / (1 - e2 * sin_phi**2)**(3/2)
+      N = a / np.sqrt(1 - e2 * sin_phi**2)
+      return M, N
+
+  lengths_elip2000 = []
+  lengths_elip1992 = []
+
+  azimuths_2000 = []
+  azimuths_back_2000 = []
+  azimuths_1992 = []
+  azimuths_back_1992 = []
+
+  P_1_2000 = 0
+  P_2_2000 = 0
+  P_1_1992 = 0
+  P_2_1992 = 0
+  areas_table = [P_1_2000, P_2_2000, P_1_1992, P_2_1992]
+
+  phis = np.deg2rad(phis)
+  lambdas = np.deg2rad(lambdas)
+
+  # Redukcje
+  for i in range(4):
+      # kij
+      j = (i + 1) % 4
+      k = (i - 1) % 4
+  
+      # Redukcja długości 
+      phi_m = (phis[i] + phis[j]) / 2
+      M, N = M_and_N(phi_m)
+      Rm = np.sqrt(M * N)
+  
+      # Długość odcinka na płaszczyźnie
+      length_2000 = np.sqrt((x_out[i][0] - x_out[j][0])**2 + 
+    (y_out[i][0] - y_out[j][0])**2)
+      length_1992 = np.sqrt((x_out[i][1] - x_out[j][1])**2 + 
+    (y_out[i][1] - y_out[j][1])**2)
+  
+      # Długość odcinka na płaśzczyźnie Gaussa-Krugera
+      length_gk2000 = length_2000 / m2000
+      length_gk1992 = length_1992 / m1992
+  
+      # Redukcja długości
+      r2000 = length_gk2000 /10000  * (y_out[i][0] ** 2 + y_out[i][0] * 
+    y_out[j][0] + y_out[j][0] ** 2) / (6 * Rm ** 2)
+      r1992 = length_gk1992 /10000 * (y_out[i][1] ** 2 + y_out[i][1] * 
+    y_out[j][1] + y_out[j][1] ** 2) / (6 * Rm ** 2)
+  
+      # Długość odcinka na elipsoidzie
+      length_elip2000 = length_gk2000 - r2000 / 100
+      length_elip1992 = length_gk1992 - r1992 / 100
+      lengths_elip2000.append(round(length_elip2000, 3))
+      lengths_elip1992.append(round(length_elip1992, 3))
+  
+      # Redukcja azymutów
+      d_lambda = lambdas[i] - lamb0
+      t = np.tan(phis[0])
+      eta2 = e22 * np.cos(phis[i]) ** 2
+  
+      for u in range(2):
+          # Kąt kierunkowy
+          delta_x = x_out[j][u] - x_out[i][u]
+          delta_y = y_out[j][u] - y_out[i][u]
+          alpha_ab = np.arctan2(delta_y, delta_x)
+          delta_x = x_out[i][u] - x_out[j][u]
+          delta_y = y_out[i][u] - y_out[j][u]
+          alpha_ba = np.arctan2(delta_y, delta_x)
+  
+          # Zbieżność południków
+          gamma_a = (d_lambda * np.sin(phis[i])) + ((d_lambda ** 3 / 3) * 
+        np.sin(phis[i]) * np.cos(phis[i]) ** 2 * (1 + 3 * eta2 + 2 * eta2 ** 2)) 
+        + ((d_lambda ** 5 / 15) * np.sin(phis[i]) * np.cos(phis[i]) ** 4 
+        * (2 - t ** 2)) 
+          gamma_b = (d_lambda * np.sin(phis[j])) + ((d_lambda ** 3 / 3) * 
+        np.sin(phis[j]) * np.cos(phis[j]) ** 2 * (1 + 3 * eta2 + 2 * eta2 ** 2))
+        + ((d_lambda ** 5 / 15) * np.sin(phis[j]) * np.cos(phis[j]) ** 4 
+        * (2 - t ** 2))
+          
+          # Redukcja kierunków
+          delta_ab = (x_out[j][u] - x_out[i][u]) * 
+        (2 * y_out[u][i] + y_out[u][j]) / (6 * Rm ** 2)
+          delta_ba = (x_out[i][u] - x_out[j][u]) * 
+        (2 * y_out[u][j] +  y_out[u][i]) / (6 * Rm ** 2)
+  
+          # Azymut odcinka
+          A_ab = alpha_ab + gamma_a + delta_ab
+          A_ba = alpha_ba + gamma_b + delta_ba
+          A_ab = np.degrees(A_ab)
+          A_ba = np.degrees(A_ba)
+          if A_ab < 0:
+            A_ab += 360
+          if A_ba < 0:
+            A_ba += 360
+  
+          if u == 0:
+              azimuths_2000.append(A_ab)
+              azimuths_back_2000.append(A_ba)
+          elif u == 1:
+              azimuths_1992.append(A_ab)
+              azimuths_back_1992.append(A_ba)
+\end{lstlisting}
+
+\newpage
+\listoftables
+\lstlistoflistings
+
+\end{document}

@@ -1,0 +1,542 @@
+\documentclass[fleqn,10pt,a4paper]{article}
+\usepackage{polski}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry} 
+\usepackage{enumerate}
+\usepackage{sidecap}
+\usepackage{wrapfig}
+\usepackage{subfig}
+\usepackage{fancyhdr}
+\usepackage{multirow}
+\usepackage{gensymb}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{verbatim}
+\usepackage{media9}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+\usepackage{xcolor}
+
+% Define custom colors
+\definecolor{mygreen}{RGB}{127,148,0}
+\definecolor{mygray}{RGB}{80,80,80}
+\definecolor{mymauve}{RGB}{251,98,246}
+\definecolor{myblue}{RGB}{0, 166, 237}
+\definecolor{myorange}{RGB}{246, 81, 29}
+
+% Define a custom style for your code
+\lstdefinestyle{mycode}{
+  backgroundcolor=\color{white},
+  commentstyle=\color{mygreen},
+  keywordstyle=\color{myblue},
+  numberstyle=\tiny\color{black},
+  stringstyle=\color{myorange},
+  basicstyle=\ttfamily\small\color{mygray},
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=t,
+  keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=true,
+  tabsize=2,
+  frame=single
+}
+
+
+\lstset{
+  backgroundcolor=\color{white},
+  literate={ą}{{\k{a}}}1 {ć}{{\'c}}1 {ę}{{\k{e}}}1 {ł}{{\l}}1 {ń}{{\'n}}1 {ó}{{\'o}}1 {ś}{{\'s}}1 {ź}{{\'z}}1 {ż}{{\.z}}1
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  filecolor=magenta,      
+  urlcolor=cyan,
+}
+
+\hypersetup{breaklinks=true}
+\urlstyle{same}
+\renewcommand{\lstlistingname}{Kod źródłowy}
+\renewcommand{\lstlistlistingname}{Spis kodów źródłowych}
+\renewcommand{\figurename}{Rysunek}
+\renewcommand{\listfigurename}{Spis rysunków}
+
+\makeatletter
+\renewcommand{\maketitle}{%
+  \begin{titlepage}
+    \begin{center}
+      \vspace*{2cm}
+      {\huge \@title \par}
+      \vspace{1.5cm}
+      {\large \@author \\ nr 1, gr. 2 \\ 325693 \par}
+      \vspace{1.5cm}
+      {\large Wydział Geodezji i Kartografii\\ Politechnika Warszawska \par}
+      \vspace{11cm}
+      {\large \@date \par}
+      \vspace{1.5cm}
+    \end{center}
+  \end{titlepage}
+}
+\makeatother
+    \title{\textbf{SPRAWOZDANIE Z ĆWICZENIA 3:}\\ Przeniesienie współrzędnych geodezyjnych na powierzchni elipsoidy obrotowej}
+\author{Maja Kret}
+\date{Warszawa, \today}
+
+
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+\linespread{1.3}
+
+
+\begin{document} 
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\maketitle
+\rhead{~}
+
+\tableofcontents
+\newpage
+
+\section{Cel ćwiczenia}
+Celem ćwiczenia jest przeniesienie współrzędnych geodezyjnych na powierzchni elipsoidy obrotowej
+oraz wizualizacja i analiza ich na mapie.
+
+
+\section{Wstęp teoretyczny}
+
+\subsection{Algorytm Kivioja}
+Algorytm Kivioja umożliwia przeniesienie współrzędnych geodezyjnych, czyli wyznaczenie współrzędnych punktu końcowego oraz azymutu na końcu odcinka linii geodezyjnej. 
+Dane do wykonania obliczenia to współrzędne punktu początkowego, azymut do punktu końcowego oraz odległość geodezyjna pomiędzy punktami.
+Algorytm wykorzystuje metodę całkowania numerycznego - dzieli linię geodezyjną na n krótkich odcinków, a następnie iteracyjne oblicza przyrosty współrzędnych kolejnych punktów oraz
+korekty azymutu aż do punktu końcowego.
+Współrzędnymi punktu końcowego jest suma przyrostów współrzędnych.
+
+\subsection{Algorytm Vincentego}
+Algorytm Vincentego jest bardziej złożony od algorytmu Kivioja. Rozwiązuje on problem przeciwny, ponieważ za pomocą współrzędnych dwóch punktów 
+oblicza azymut oraz odległość pomiędzy nimi. W tym ćwiczeniu użyto go do korekty współrzędnych obliczonych algorytmem Kivioja.
+
+\section{Dane do ćwiczenia}
+\vspace*{1cm}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+$\varphi_1$ & $53 \degree 45' 00.00000''$ \\ \hline
+$\lambda_1$ & $15 \degree 15' 00.00000''$ \\ \hline
+\end{tabular}
+  \centering
+  \caption{Współrzędne punktu początkowego $P_1$
+\label{p1}}
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    nr & długość $s[km]$ & azymut $A[\degree]$\\ \hline
+    1 - 2 & 40 & $0\degree 00' 00.000''$ \\ \hline
+    2 - 3 & 100 & $90\degree 00' 00.000''$ \\ \hline
+    3 - 4 & 40 & $180\degree 00' 00.000''$ \\ \hline
+    4 - 1 & 100 & $270\degree 00' 00.000''$ \\ \hline
+    \end{tabular}
+  \caption{Parametry linii geodezyjnych 
+  \label{linie_geo}}
+\end{table}
+
+\newpage
+\justify
+\section{Przebieg ćwiczenia}
+
+\begin{enumerate}
+  \item \textbf{Wyznaczenie współrzędnych punktów metodą Kivioja:} Punkty 2, 3, 4 i 1* zostały obliczone
+  poprzez zastosowanie funkcji \texttt{kivioj} (kod \ref{kod:kivioja}), która za argumenty przyjmuje współrzędne punktu początkowego,
+  azymut do kolejnego punktu, długość linii pomiędzy punktami oraz liczbę iteracji ustawioną na 1000.
+  \item \textbf{Analiza punktów na mapie:} Przedstawiono obliczone punkty na mapie i narysowany figurę,
+  którą wyznaczają (kod \ref{kod:kivioja}). Następnie obliczono odległość pomiędzy punktami 1 i 1*.
+  \item \textbf{Zastosowanie algorytmu Vincentego:} Z użyciem uzyskanych współrzędnych punktu 4 oraz punktu początkowego, 
+  obliczono faktyczną odległość pomiędzy punktem 4 a 1 oraz azymut 4 - 1 i odwrotny (funkcja \texttt{vincenty}, kod \ref{kod:vincenty}). 
+  Następnie zastosowano te parametry do zamknięcia trapezu - wyliczenia punktu 1* algorytmem Kivioja, który będzie się pokrywał z punktem 1.
+  \item \textbf{Wizualizacja na mapie:} Zaznaczono obliczone punkty na mapie oraz narysowano zamkniętą figurę.
+   Do stworzenia map oraz tabel użyto biblioteki \texttt{plotly.graph\_objects}
+  \item \textbf{Obliczenie pola i obwodu figury:} Do obliczenia pola i obwodu figury użyto funkcji \\
+  \texttt{geometry\_area\_perimeter} z biblioteki \texttt{pyproj} (kod \ref{kod:pole}).
+\end{enumerate}
+
+\section{Wyniki ćwiczenia}
+
+\subsection{Algorytm Kivioja}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{photos/wspol_kiv.png}
+  \caption{Współrzędne punktów obliczone algorytmem Kivioja}
+  \label{wspol:kiv}
+\end{figure}
+
+W tabeli \ref{wspol:kiv} przedstawiono obliczone współrzędne punktów - szerokość i długość geodezyjną oraz azymut na końcu linii geodezyjnej.
+
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=1\textwidth]{photos/scattermapbox.png}
+  \caption{Otrzymana figura}
+  \label{fig:kiv}
+\end{figure}
+
+Na mapie wyraźnie widać, że punkty nie zamykają się w czworokąt, a punkt 1* nie pokrywa się z początkowym.
+Punkt 1* znajduje się $1' 9.44748''$ na południe i $46.31182''$ na wschód od punktu 1.
+Co za pomocą funkcji \texttt{line\_length} można wyliczyć na odległość aż $2322.516 m$, czyli ponad $2.3 km$.
+Rysowane boki trapezu nie są do siebie prostopadłe, z obliczonych azymutów wynika, że linia 2 - 3 była narysowana pod kątem mniejszym niż
+$90\degree$, a linia przeciwna 4 - 1* pod kątem większym niż $90\degree$ w stosunku do poprzednich linii.
+Natomiast w przypadku linii o długości 40 km, czyli  1* - 2 oraz 3 - 4, azymut przy końcu linii pozostał taki sam i nie 
+doszło tu do żadnej korekty.
+
+\subsection{Algorytm Vincentego}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{photos/vincenty.png}
+  \caption{Właściwa odległość oraz azymut 4 - 1}
+  \label{az:vincenty}
+\end{figure}
+
+Przy pomocy algorytmu Vincentego wyliczono odległość oraz azymut pomiędzy punktami 4 i 1, które znajdują się w tabeli \ref{az:vincenty}. Dane te można następnie
+użyć do narysowania zamkniętego trapezu o linii 4 - 1 odpowiednio skorygowanej, aby była równoległa do linii 2 - 3.
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=1\textwidth]{photos/wspol_vin.png}
+  \caption{Właściwe współrzędne zamkniętej figury}
+  \label{wspol:vincenty}
+\end{figure}
+
+Na podstawie współrzędnych zawartych w tabeli \ref{wspol:vincenty} można stwierdzić, że współrzędne punktu pierwszego oraz ostatniego są identyczne,
+a więc tworzą one zamknięty trapez. Jego pole oraz obwód obliczono przy użyciu funkcji \texttt{geometry\_area\_perimeter} z biblioteki \texttt{pyproj}.
+Pole wynosi \textbf{4 016 880 873.853 $m^2$}, czyli w przybliżeniu $4016.881 km^2$, 
+a obwód \textbf{280 862.551$m$} co odpowiada około $280.863 km$. 
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=1\textwidth]{photos/scattermapbox_vin.png}
+  \caption{Otrzymany trapez}
+  \label{fig:vincenty}
+\end{figure}
+
+\section{Wnioski}
+
+Powodem, dlaczego otrzymana figura po zastosowaniu algorytmu Kivioja się nie zamyka jest kształt Ziemi.
+Rysując prostą linię geodezyjną na powierzchni elipsoidy, trzeba brać pod uwagę zakrzywienie Ziemi i dokonywać
+ciągłej korekcji azymutu. Jest to zaimplementowane w algorytmie Kivioja, który uwzględniając zakrzywienie,
+wylicza współrzędne z skorygowanym azymutem, który różni się od przyjętego na początku.
+Odchyłki kształtu figury od oczekiwanego prostokąta wynikają z odległości punktów od biegunów, gdzie zakrzywienia są największe. 
+Gdy przyjmiemy za współrzędne punktu początkowego wartości $(0 \degree, 0 \degree)$
+różnice współrzędnych pomiędzy punktem pierwszym a ostatnim będą niewielkie. Również azymuty przy końcach linii geodezyjnych
+będą bliższe azymutom danym. Pole trapezu będzie bliskie polu prostokąta, ponieważ będzie wynosić 4000.135 $km^2$.
+Gdy zmienimy współrzędne punktu początkowego na bliskie równikowi, linie 
+2 - 3 oraz 4 - 1* będą rysowane z większym zakrzywieniem, a punkty 1 i 1* będą jeszcze dalej od siebie. 
+Wynika z tego, że na dokładność obliczeń bezpośredni wpływ ma szerokość geograficzna punktów.
+Natomiast niezależnie od długości geograficznej, linie 1 - 2 oraz 3 - 4 będą zawsze równoległe, a azymut przy ich końcu nie będzie korygowany
+dla długości 40km.
+
+\newpage
+\section{Kod źródłowy}
+
+\begin{lstlisting}[language=Python, caption=Zamiany jednostek kątowych, label = kod:katy, style = mycode]
+  degree_sign = u"\N{DEGREE SIGN}"
+
+  # Radiany na stopnie, minuty i sekundy
+  def rad2dms(rad):
+    dd = np.rad2deg(rad)
+    dd = dd
+    deg = int(np.trunc(dd))
+    mnt = int(np.trunc((dd-deg) * 60))
+    sec = ((dd-deg) * 60 - mnt) * 60
+    mnt = abs(mnt)
+    sec = abs(sec)
+    if sec > 59.99999:
+        sec = 0
+        mnt += 1
+    sec = f"{sec:.5f}"
+    dms = (f"{deg}{degree_sign} {mnt}' {sec}''")
+    return dms
+
+  # Stopnie dziesiętne na stopnie, minuty i sekundy
+  def deg2dms(dd):
+    deg = int(np.trunc(dd))
+    mnt = int(np.trunc((dd-deg) * 60))
+    sec = ((dd-deg) * 60 - mnt) * 60
+    mnt = abs(mnt)
+    sec = abs(sec)
+    sec = f"{sec:.5f}"
+    dms = (f"{deg}{degree_sign} {mnt}' {sec}''")
+    return dms
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption = Algorytm Kivioja, label = kod:kivioja, style = mycode]
+  # Parametry elipsoidy
+  a = 6378137
+  e2 = 0.00669438002290
+  g = Geod(ellps='WGS84')
+  
+  # Współrzędne punktu początkowego
+  phi_1_deg = 53 + 45/60
+  lam_1_deg = 15 + 15/60
+  s = [40000, 100000, 40000, 100000]
+  Az_1_deg = [0, 90, 180, 270]
+  
+  phi_1 = np.deg2rad(phi_1_deg)
+  lam_1 = np.deg2rad(lam_1_deg)
+  Az_1 = np.deg2rad(Az_1_deg)
+  
+  # Promienie główne krzywizny
+  def M_and_N(phi):
+    sin_phi = np.sin(phi)
+    M = a * (1 - e2) / (1 - e2 * sin_phi**2)**(3/2)
+    N = a / np.sqrt(1 - e2 * sin_phi**2)
+    return M, N
+  
+  # Algorytm Kivioja
+  def kivioj(phi_1, lam_1, Az_1, s, n=1000):
+    ds = s / n
+
+    phi = phi_1
+    lam = lam_1
+    Az = Az_1
+
+    for i in range(n):
+      M, N = M_and_N(phi)
+      dphi = ds * np.cos(Az) / M
+      dAz = ds * np.sin(Az) * np.tan(phi) / N
+
+      phi_mid = phi + dphi / 2
+      Az_mid = Az + dAz / 2
+
+      M_mid, N_mid = M_and_N(phi_mid)
+      dphi_mid = ds * np.cos(Az_mid) / M_mid
+      dlam_mid = ds * np.sin(Az_mid) / (N_mid * np.cos(phi_mid))
+      dAz_mid = ds * np.sin(Az_mid) * np.tan(phi_mid) / N_mid
+
+      phi += dphi_mid
+      lam += dlam_mid
+      Az += dAz_mid
+
+    return phi, lam, Az
+  
+  phis_kiv = [phi_1_deg]
+  lambdas_kiv = [lam_1_deg]
+  azimuths_kiv = [Az_1_deg[0]]
+  
+  phis_kiv_dms = [deg2dms(phi_1_deg)]
+  lambdas_kiv_dms = [deg2dms(lam_1_deg)]
+  azimuths_kiv_dms = [deg2dms(Az_1_deg[0])]
+  
+  # Obliczenie współrzędnych  punktów
+  for i in range(4):
+    phi, lam, Az = kivioj(phi_1, lam_1, Az_1[i], s[i])
+
+    phis_kiv.append(np.rad2deg(phi))
+    lambdas_kiv.append(np.rad2deg(lam))
+    azimuths_kiv.append(np.rad2deg(Az))
+
+    phis_kiv_dms.append(rad2dms(phi))
+    lambdas_kiv_dms.append(rad2dms(lam))
+    azimuths_kiv_dms.append(rad2dms(Az))
+
+    phi_1 = phi
+    lam_1 = lam
+
+  nr = ['1', '2', '3', '4', '1*']
+
+  # Tabela współrzędnych
+  fig = go.Figure(go.Table(
+    header = dict(values = ['nr', 'phi', 'lambda', 'azymut']), 
+    cells = dict(values = [nr, phis_kiv_dms, lambdas_kiv_dms, azimuths_kiv_dms])
+  ))
+  fig.update_layout(
+    title = 'Współrzędne punktów obliczone algorytmem Kivioja', 
+    width = 1000, height = 400
+  )
+  fig.show()
+
+  # Mapa współrzędnych
+  fig = go.Figure(
+    go.Scattermapbox(
+      lat = phis_kiv,
+      lon = lambdas_kiv,
+      mode = 'markers+lines',
+      marker = dict(size = 10, color = 'red'),
+      line = dict(width = 2, color = 'red'),
+      text = nr,
+      hoverinfo='text'))
+  fig.update_layout(
+    title = 'Scattermapbox - Algorytm Kivioja',
+    mapbox_style = "open-street-map",
+    width = 2000, 
+    height = 1000,
+    mapbox = dict(
+      center = go.layout.mapbox.Center(
+        lat = phi_1_deg,
+        lon = lam_1_deg
+      ),
+      zoom = 7
+    ),
+  )
+  fig.show()
+
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[language=Python, caption = Algortym Vincentego, label = kod:vincenty, style = mycode]
+  # Funkcja udostępniona przez prowadzącego - algorytm Vincentego
+  def vincenty(BA,LA,BB,LB):
+    b = a * np.sqrt(1-e2)
+    f = 1-b/a
+    dL = LB - LA
+    UA = np.arctan((1-f)*np.tan(BA))
+    UB = np.arctan((1-f)*np.tan(BB))
+    L = dL
+    while True:
+      sin_sig = np.sqrt((np.cos(UB)*np.sin(L))**2 +\
+        (np.cos(UA)*np.sin(UB) - np.sin(UA)*np.cos(UB)*np.cos(L))**2)
+      cos_sig = np.sin(UA)*np.sin(UB) + np.cos(UA) * np.cos(UB) * np.cos(L)
+      sig = np.arctan2(sin_sig,cos_sig)
+      sin_al = (np.cos(UA)*np.cos(UB)*np.sin(L))/sin_sig
+      cos2_al = 1 - sin_al**2
+      cos2_sigm = cos_sig - (2 * np.sin(UA) * np.sin(UB))/cos2_al
+      C = (f/16) * cos2_al * (4 + f*(4 - 3 * cos2_al))
+      Lst = L
+      L = dL + (1-C)*f*sin_al*(sig+C*sin_sig*(cos2_sigm+\
+        C*cos_sig*(-1 + 2*cos2_sigm**2)))
+      if abs(L-Lst)<(0.000001/206265):
+          break
+
+    u2 = (a**2 - b**2)/(b**2) * cos2_al
+    A = 1 + (u2/16384) * (4096 + u2*(-768 + u2 * (320 - 175 * u2)))
+    B = u2/1024 * (256 + u2 * (-128 + u2 * (74 - 47 * u2)))
+    d_sig = B*sin_sig * (cos2_sigm + 1/4*B*(cos_sig*(-1+2*cos2_sigm**2)\
+      - 1/6 *B*cos2_sigm * (-3 + 4*sin_sig**2)*(-3+4*cos2_sigm**2)))
+    sAB = b*A*(sig-d_sig)
+    A_AB = np.arctan2((np.cos(UB) * np.sin(L)),(np.cos(UA)*np.sin(UB) - np.sin(UA)*np.cos(UB)*np.cos(L)))
+    A_BA = np.arctan2((np.cos(UA) * np.sin(L)),(-np.sin(UA)*np.cos(UB) + np.cos(UA)*np.sin(UB)*np.cos(L))) + np.pi
+    return sAB, A_AB, A_BA
+
+  length41, az41, az_odw41 = vincenty(
+    np.deg2rad(phis_kiv[3]), np.deg2rad(lambdas_kiv[3]), 
+    np.deg2rad(phis_kiv[0]), np.deg2rad(lambdas_kiv[0]))
+  length = [f"{length41:.5f}"]
+  az_deg = rad2dms(az41)
+  az_odw_deg = rad2dms(az_odw41)
+  
+  # Tabela odległości i azymutów 4 - 1
+  fig = go.Figure(go.Table(
+    header = dict(values = ['A - B', 'Odl. AB [m]', 'Az. AB', 'Az. odw. AB']), 
+    cells = dict(values = ['4 - 1', length, az_deg, az_odw_deg])
+  ))
+  fig.update_layout(
+    title = 'Algorytm Vincentego', 
+    width = 1000, height = 300
+  )
+  fig.show()
+  
+  phis_vin = phis_kiv[0:4]
+  lambdas_vin = lambdas_kiv[0:4]
+  azimuths_vin = azimuths_kiv[0:4]
+  
+  phis_vin_dms = phis_kiv_dms[0:4]
+  lambdas_vin_dms = lambdas_kiv_dms[0:4]
+  azimuths_vin_dms = azimuths_kiv_dms[0:4]
+  
+  phi_vin5, lam_vin5, Az_vin5 = kivioj(
+    np.deg2rad(phis_kiv[3]), np.deg2rad(lambdas_kiv[3]), az41, length41)
+  phis_vin.append(np.rad2deg(phi_vin5))
+  lambdas_vin.append(np.rad2deg(lam_vin5))
+  azimuths_vin.append(np.rad2deg(Az_vin5))
+  
+  phis_vin_dms.append(rad2dms(phi_vin5))
+  lambdas_vin_dms.append(rad2dms(lam_vin5))
+  azimuths_vin_dms.append(rad2dms(Az_vin5))
+  
+  # Tabela skorygowanych współrzędnych
+  fig = go.Figure(go.Table(
+    header = dict(values = ['nr', 'phi', 'lambda', 'azymut']), 
+    cells = dict(values = [nr, phis_vin_dms, lambdas_vin_dms, azimuths_vin_dms])
+  ))
+  fig.update_layout(
+    title = 'Współrzędne właściwe punktów obliczone algorytmem Vincentego', 
+    width = 1000, height = 400
+  )
+  fig.show()
+  
+  # Mapa skorygowanych współrzędnych
+  fig = go.Figure(
+    go.Scattermapbox(
+      lat = phis_vin,
+      lon = lambdas_vin,
+      mode = 'markers+lines',
+      marker = dict(size = 10, color = 'blue'),
+      line = dict(width = 2, color = 'blue'),
+      text = nr,
+      hoverinfo='text'))
+  fig.update_layout(
+    title = 'Scattermapbox - Algorytm Vincentego',
+    mapbox_style = "open-street-map",
+    width = 2000, 
+    height = 1000,
+    mapbox = dict(
+      center = go.layout.mapbox.Center(
+        lat = phi_1_deg,
+        lon = lam_1_deg
+      ),
+      zoom = 7
+    ),
+  )
+  fig.show()
+
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption = Pole i obwód figury, label = kod:pole, style = mycode]
+  # Obliczenie pola i obwodu
+  area, perimeter = g.geometry_area_perimeter(
+    Polygon(
+      LineString([
+        Point(lambdas_vin[i], phis_vin[i]) for i in range(len(lambdas_vin))])
+      ))
+
+  area = abs(area)
+  area_km = area / 1000000
+  perimeter_km = perimeter / 1000
+  area = f"{area:.3f}"
+  area_km = f"{area_km:.3f}"
+  perimeter = f"{perimeter:.3f}"
+  perimeter_km = f"{perimeter_km:.3f}"
+
+  fig = go.Figure(go.Table(
+    header = dict(values = [r'','Pole', r'Obwód']), 
+    cells = dict(values = [['[km]', '[m]'], [area, area_km], [perimeter, perimeter_km]])))
+  fig.update_layout(
+    title = 'Pole i obwód wielokąta', 
+    width = 1000, height = 300)
+  fig.show()
+\end{lstlisting}
+
+\newpage
+\listoftables
+\listoffigures
+\lstlistoflistings
+
+\end{document}
