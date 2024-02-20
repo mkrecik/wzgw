@@ -1,0 +1,619 @@
+\documentclass[fleqn,10pt,a4paper]{article}
+\usepackage{polski}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry} 
+\usepackage{enumerate}
+\usepackage{sidecap}
+\usepackage{wrapfig}
+\usepackage{subfig}
+\usepackage{fancyhdr}
+\usepackage{multirow}
+\usepackage{gensymb}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{verbatim}
+\usepackage{media9}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{
+  language=Python,
+  basicstyle=\footnotesize\ttfamily,
+  commentstyle=\color{mygreen},
+  keywordstyle=\color{blue},
+  numberstyle=\tiny\color{mygray},
+  numbers=none,
+  stringstyle=\color{mymauve},
+  breaklines=true,
+  showstringspaces=false,
+  frame=single,
+  backgroundcolor=\color{white},
+  literate={ą}{{\k{a}}}1 {ć}{{\'c}}1 {ę}{{\k{e}}}1 {ł}{{\l}}1 {ń}{{\'n}}1 {ó}{{\'o}}1 {ś}{{\'s}}1 {ź}{{\'z}}1 {ż}{{\.z}}1
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  filecolor=magenta,      
+  urlcolor=cyan,
+}
+
+\hypersetup{breaklinks=true}
+\urlstyle{same}
+\renewcommand{\lstlistingname}{Kod źródłowy}
+\renewcommand{\lstlistlistingname}{Spis kodów źródłowych}
+\renewcommand{\figurename}{Wykres}
+\renewcommand{\listfigurename}{Spis wykresów}
+
+\makeatletter
+\renewcommand{\maketitle}{%
+  \begin{titlepage}
+    \begin{center}
+      \vspace*{2cm}
+      {\huge \@title \par}
+      \vspace{1.5cm}
+      {\large Dane nr 15\par}
+      \vspace{1.5cm}
+      {\large \@author \\ 325693 \par}
+      {\large Wydział Geodezji i Kartografii\\ Politechnika Warszawska \par}
+      \vspace{9cm}
+      {\large \@date \par}
+      \vspace{1.5cm}
+    \end{center}
+  \end{titlepage}
+}
+\makeatother
+    \title{\textbf{SPRAWOZDANIE Z ĆWICZENIA 2:}\\ Transformacja współrzędnych elipsoidalnych samolotu do układu lokalnego}
+\author{Maja Kret}
+\date{Warszawa, \today}
+
+
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+\linespread{1.3}
+
+
+\begin{document} 
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\maketitle
+\rhead{~}
+
+\tableofcontents
+\newpage
+
+\section{Cel ćwiczenia}
+Celem ćwiczenia jest transformacja współrzędnych elipsoidalnych lecącego samolotu do układu lokalnego. 
+Następnie należy zwizualizować trasę lotu na mapach i wykresach współrzędnych.
+
+\section{Wstęp teoretyczny}
+
+Współrzędne elipsoidalne są powszechnie stosowane w geodezji, reprezentując położenie punktu 
+na powierzchni elipsoidy odniesienia za pomocą szerokości ($\varphi$) i długości ($\lambda$) geograficznej oraz wysokości ($h$) nad powierzchnią 
+elipsoidy. W kontekście lotnictwa, te współrzędne pozwalają na precyzyjne określenie lokalizacji samolotu w danym momencie lotu. 
+Przekształcenie tych danych do układu lokalnego, związanego z konkretnym punktem na Ziemi - w tym przypadku lotniskiem - umożliwia lepsze 
+zrozumienie względnej pozycji samolotu w odniesieniu do lokalizacji lotniska, a co za tym idzie, stwierdzenie, czy samolot znajduje się w zasięgu widzenia.
+W przypadku, gdy kąt elewacji jest ujemny, samolot znajduje się poniżej horyzontu i nie jest widoczny z lotniska.
+
+\section{Dane do ćwiczenia}
+\subsection{Dane lotu}
+Danymi do ćwiczenia jest plik \texttt{lot15.csv} zawierający dane o locie.
+Analizowany był lot o numerze LOT4YH - LO483 z Warszawy do Oslo.
+Każdy wiersz pliku zawiera następujące dane:
+\begin{table}[!ht]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+Indeks & Nazwa & Jednostka \\ \hline
+0 & \multicolumn{2}{c|}{Znacznik czasu} \\ \hline
+1 & \multicolumn{2}{c|}{rok}  \\ \hline
+2 & \multicolumn{2}{c|}{miesiąc} \\ \hline
+3 & \multicolumn{2}{c|}{dzień} \\ \hline
+4 & \multicolumn{2}{c|}{godzina} \\ \hline
+5 & \multicolumn{2}{c|}{minuta} \\ \hline
+6 & \multicolumn{2}{c|}{sekunda} \\ \hline
+7 & Szerokość geograficzna $[\varphi]$ & \degree \\ \hline
+8 & Długość geograficzna $[\lambda]$ & \degree \\ \hline
+9 & Wysokość $[h]$ & stopy \\ \hline
+10 & Prędkość & kts \\ \hline
+11 & Kierunek & $\degree$ \\ \hline
+\end{tabular}
+\caption{Dane samolotu \label{dane_excel}}
+\end{table}
+\newpage
+\subsection{Dane elipsoidy}
+\begin{lstlisting}[language=Python, caption = Dane elipsoidy,label = dane_lotniska]
+  h_norm_waw = 104
+  h_norm_osl = 208
+  undulacja = 31.4
+  a = 6378137.0
+  e2 = 0.00669438002290
+\end{lstlisting}
+gdzie $h\_norm$ to wysokość normalna dla danego lotniska, a $a$ i $e2$ to parametry elipsoidy GRS80
+
+
+\section{Przebieg ćwiczenia}
+
+\begin{enumerate}
+  \item \textbf{Wczytanie danych z pliku:} Dane dotyczące badanego lotu zostały wczytane z pliku \texttt{lot15.csv} za pomocą funkcji \texttt{read\_flightradar}.
+  \item \textbf{Selekcja danych lotu:} Wydobyto dane, zebrane podczas, gdy samolot znajdował się ponad poziomem Ziemi - miał dodatnią wysokość.
+  Interesują nas współrzędne samolotu, jego prędkość i wysokość oraz dokładna godzina, o której te parametry zostały zarejestrowane.  
+  Następnie wyselekcjonowano współrzędne lotnisk odlotu i przylotu. Do wysokości dodano też wysokość normalną dla danego lotniska oraz undulację.
+  Undulację dla Oslo pominięto. Prędkość przeliczono z węzłów na $\frac{km}{h}$. A wysokość samolotu z stóp na metry.
+  \item \textbf{Przeliczanie współrzędnych lotniska i samolotu do współrzędnych ortokartezjańskich:} 
+  Funkcja \texttt{orto} z kodu źródłowego \ref{transformacja} przyjmuje jako argumenty szerokość $[\varphi]$ i długość $[\lambda]$ geograficzną w radianach oraz wysokość $[h]$
+  w metrach. Następnie przelicza i zwraca współrzędne ortokartezjańskie $[X, Y, Z]$.
+  \item \textbf{Transformacja wektora współrzędnych samolotu do współrzędnych lokalnych:} 
+  Transformacja odbywa się za pomocą macierzy obrotu $R$ tworzonej w funkcji \texttt{macierz\_obrotu} przyjmującej jako argumenty 
+  szerokość $[\varphi]$ i długość $[\lambda]$ geograficzną w radianach. Funkcja znajduje się w kodzie źródłowym \ref{transformacja}.
+  \item \textbf{Obliczenia azymutu i elewacji:} W pętli opisanej w kodzie źródłowym \ref{petla}, dla każdej z pozycji samolotu obliczono azymut i elewację względem lotnisk
+  oraz odległość od lotniska. Dane zapisano w tablicach \texttt{data\_waw} i \texttt{data\_osl} wraz z czasem.
+  \item \textbf{Wizualizacje:} Do przygotowania wykresów wykorzystano bibliotekę \texttt{matplotlib}, a do map lotu - \texttt{plotly} oraz \texttt{cartopy}.
+  Wykonano mapy trasy samolotu \ref{linia} i \ref{newplot} oraz wykresy \ref{skyplot_waw} - \ref{skyplot_odl_osl} pokazujące znikanie i pojawianie się samolotu nad horyzontem.
+  Następnie opracowano wykresy \ref{wys_h} - \ref{odleglosc_h}: wysokości, prędkości, kąta elewacji i odległości samolotu od lotniska w funkcji czasu.
+  \item \textbf{Opracowanie wyników} Na podstawie obliczonych wartości stwierdzono w jakich odległościach od lotniska samolot był widoczny nad horyzontem,
+  a także w jakich godzinach znikał i się pojawiał. Zebrano także informacje o maksymalnej wysokości, prędkości.
+\end{enumerate}
+
+\newpage
+\section{Wyniki ćwiczenia}
+\subsection{Mapa lotu}
+
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\textwidth]{zdjecia/linia_geo.png}
+  \caption{Linia lotu}
+  \label{linia}
+\end{figure}
+Mapa \ref{linia} przedstawia linię geodezyjną pomiędzy lotniskami przylotu i odlotu będąca odwzorowaniem idealnego przebiegu trasy.
+Trasa lotu ma długość 1076.99 km, a czas przelotu wynosi 1h 45min.
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=0.45\textwidth]{zdjecia/newplot.png}
+  \includegraphics[width=0.45\textwidth]{zdjecia/newplot_europe.png}
+  \caption{Mapa lotu}
+  \label{newplot}
+\end{figure}
+Mapa nr \ref{newplot} przedstawia trasę samolotu stworzoną z kolejnych zarejestrowanych lokalizacji samolotu.
+  
+\newpage
+
+\subsection{Wykresy Skyplot dla lotniska WAW}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{zdjecia/odl_waw_punkty.png}
+  \caption{Wykres odległości samolotu od azymutu z lotniska WAW}
+  \label{skyplot_waw}
+\end{figure}
+
+Wykres \ref{skyplot_waw} przedstawia kolejne odległości samolotu w funkcji azymutu aż do momentu zniknięcia poniżej
+horyzontu o godzinie 15:48 w odległości 321.52 km od lotniska. W tym momencie kąt elewacji samolotu schodzi poniżej $0 \degree$.
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\textwidth]{zdjecia/odl_waw_horyzont.png}
+  \caption{Wykres odległości samolotu od azymutu z lotniska WAW w postaci linii}
+  \label{skyplot_odl_waw}
+\end{figure}
+
+Na wykresie \ref{skyplot_odl_waw} również zaznaczona jest zależność odległości samolotu od azymutu z lotniska Warszawie.
+Zawarte są tu dane z całego lotu, a interesują nas są te zaznaczone na czerwono - od momentu startu do zniknięcia samolotu za horyzontem.
+
+\clearpage
+
+\subsection{Wykresy Skyplot dla lotniska OSL}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1\textwidth]{zdjecia/odl_osl_punkty.png}
+  \caption{Wykres odległości samolotu od azymutu z lotniska OSL}
+  \label{skyplot_osl}
+\end{figure}
+
+Wykres \ref{skyplot_osl} pokazuje odległości samolotu od lotniska OSL w funkcji azymutu, w momencie gdy samolot znajduje się powyżej horyzontu.
+Pojawienie się samolotu następuje o godzinie 16:24 w odległości 365.43 km od lotniska. Jest to pierwsza zarejestrowana odległość od lotniska, gdzie wartość
+kąta elewacji jest dodatnia.
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\textwidth]{zdjecia/odl_osl_horyzont.png}
+  \caption{Wykres Skyplot odległości samolotu od azymutu z lotniska OSL w postaci linii}
+  \label{skyplot_odl_osl}
+\end{figure}
+
+Powyższy wykres \ref{skyplot_odl_osl} przedstawia te same dane w postaci ciągłej linii reprezentującej całą trasę samolotu.
+Wyselekcjonowano tu na czerwono momenty, gdy samolot był widoczny z Oslo.
+
+\clearpage
+
+\subsection{Wykresy w funkcji czasu}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\textwidth]{zdjecia/wysokosc_h.png}
+  \caption{Wykres zależności wysokości samolotu od czasu}
+  \label{wys_h}
+\end{figure}
+
+Na wykresie \ref{wys_h} zobrazowano wysokości samolotu od chwili startu o 15:19 do lądowania o 17:04. 
+Nie zawarto tu danych o samolocie podczas gdy przebywał na ziemi i wysokość wynosiła 0 m. Po osiągnięciu maksymalnej wysokości
+10.370 km, samolot pozostaje na tym poziomie większość lotu, aż do momentu hamowania przed lądowaniem.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{zdjecia/predkosc_h.png}
+    \caption{Wykres zależności prędkości samolotu od czasu}
+    \label{pred_h}
+  \end{figure}
+
+Wykres \ref{pred_h} zawiera zarejestrowane prędkości samolotu. Podczas wznoszenia się samolotu, w przeciągu 15 min, prędkość samolotu rośnie z $300 \frac{km}{h}$ - 
+podczas startu aż do $750 \frac{km}{h}$ -  w momencie osiągnięcia wysokości ponad 10 km. Następnie prędkość spada do $700 \frac{km}{h}$ i utrzymuje się na wysokim 
+poziomie do 20 minut przed lądowaniem. Wraz z zmniejszeniem prędkości maleje też wysokość samolotu.
+Największa zarejestrowana prędkość wynosi aż $840.808 \frac{km}{h}$, natomiast średnia z całego lotu to 615.135 $\frac{km}{h}$.
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\textwidth]{zdjecia/elewacja.png}
+  \caption{Wykres zależności wysokości kątowej samolotu od czasu z lotniska WAW}
+  \label{elewacja_h}
+\end{figure}
+
+Kąt elewacji, którego wartości przedstawiono na wykresie \ref{elewacja_h} maleje wraz z czasem. Można doczytać się przybliżonej
+godziny zniknięcia samolotu poniżej horyzontu gdy wykres osiąga wartość $0 \degree$.
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=1\textwidth]{zdjecia/odlod_lotniska.png}
+  \caption{Wykres zależności odległości samolotu od lotniska WAW od czasu}
+  \label{odleglosc_h}
+\end{figure}
+
+Wykres \ref{odleglosc_h} przedstawia zmianę odległość samolotu od lotniska odlotu. Jest ona stale rosnąca w czasie.
+
+\clearpage
+\section{Kod programu}
+
+\begin{lstlisting}[language=Python, caption=Funkcja wczytywania danych udostępniona przez prowadzącego, label = read]
+  def read_flightradar(file):
+      with open(file, 'r') as f:
+          i = 0
+          size= []
+          Timestamp = []; date = []; UTC = []; Latitude = []; Longitude = []; 
+          Altitude = []; Speed = []; Direction = []; datetime_date = []
+          for linia in f:
+              if linia[0:1]!='T':
+                  splited_line = linia.split(',')
+                  size.append(len(splited_line))
+                  i+=1
+                  Timestamp.append(int(splited_line[0]))
+                  full_date = splited_line[1].split('T')
+                  date.append(list(map(int,full_date[0].split('-'))))
+                  UTC.append(list(map(int, full_date[1].split('Z')[0].split(':'))))
+                  Callsign = splited_line[2]
+                  Latitude.append(float(splited_line[3].split('"')[1]))
+                  Longitude.append(float(splited_line[4].split('"')[0]))
+                  Altitude.append(float(splited_line[5]))
+                  Speed.append(float(splited_line[6]))
+                  Direction.append(float(splited_line[7]))
+                  
+      all_data = np.column_stack((np.array(Timestamp), np.array(date), np.array(UTC),
+                                  np.array(Latitude), np.array(Longitude), np.array(Altitude),
+                                  np.array(Speed), np.array(Direction)))
+      return all_data
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Funkcje transformacji współrzędnych, label = transformacja]
+  # Funkcja przeliczająca współrzędne geograficzne na współrzędne ortogonalne
+  def orto(p, l, h):
+      N = a / (np.sqrt(1 - e2 * np.sin(l) * np.sin(l)))
+      X = (N + h) * np.cos(p) * np.cos(l)
+      Y = (N + h) * np.cos(p) * np.sin(l)
+      Z = (N * (1 - e2) + h) * np.sin(p)
+      return([X, Y, Z])
+
+  # Funkcja obliczająca macierz obrotu
+  def macierz_obrotu(p, l):
+      macierz = np.array([[-np.sin(p) * np.cos(l), -np.sin(l), np.cos(p) * np.cos(l)],
+                          [-np.sin(p) * np.sin(l), np.cos(l), np.cos(p) * np.sin(l)],
+                          [np.cos(p), 0, np.sin(p)]])
+      return macierz
+
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language=Python, caption=Selekcja danych, label = dane]
+  # Współrzędne
+  wspolrzedne = dane[:, 7:10]
+  lot = np.where(wspolrzedne[:, -1]>0)[0]
+  wspolrzedne[:, -1] = wspolrzedne[:, -1] * 0.3048
+  wspolrzedne_lot = wspolrzedne[lot, :]
+  wspol_waw = wspolrzedne[lot[0]-1, :]
+  wspol_osl = wspolrzedne[lot[-1]+1, :]
+
+  # Czas
+  time_hms = dane[:, 4:7]
+  time_hms_lot = time_hms[lot, :]
+  time = time_hms[:, 0] * 60 + time_hms[:, 1] + time_hms[:, 2] / 60
+  time_lot = time[lot]
+  time_lot = time_lot - time_lot[0]
+
+  # Start i lądowanie
+  take_off = datetime.datetime(int(dane[lot[0], 1]), int(dane[lot[0], 2]), int(dane[lot[0], 3]), int(dane[lot[0], 4]), int(dane[lot[0], 5]), int(dane[lot[0], 6]))
+  landing = datetime.datetime(int(dane[lot[-1], 1]), int(dane[lot[-1], 2]), int(dane[lot[-1], 3]), int(dane[lot[-1], 4]), int(dane[lot[-1], 5]), int(dane[lot[-1], 6]))
+  flight_time = landing - take_off
+
+  # Oś czasu dla lotu
+  datetime_time_lot = [(take_off + datetime.timedelta(minutes = i)).strftime('%H:%M') for i in time_lot]
+  datetime_time_lot = np.array(datetime_time_lot)
+  datetime_time_lot = pd.to_datetime(datetime_time_lot)
+
+  # Prędkość
+  speed = dane[:, 10] * 1.852
+  speed_lot = speed[lot]
+
+  # Współrzędne lotniska WAW
+  phi_waw = np.deg2rad(wspol_waw[0])
+  lambda_waw = np.deg2rad(wspol_waw[1])
+  h_waw = wspol_waw[2] + h_norm_waw + undulacja
+
+  xyz_waw = orto(phi_waw, lambda_waw, h_waw)
+  R_waw = macierz_obrotu(phi_waw, lambda_waw)
+
+  # Wspolrzedne lotniska OSL
+  phi_osl = np.deg2rad(wspol_osl[0])
+  lambda_osl = np.deg2rad(wspol_osl[1])
+  h_osl = wspol_osl[2] + h_norm_osl
+
+  xyz_osl = orto(phi_osl, lambda_osl, h_osl)
+  R_osl = macierz_obrotu(phi_osl, lambda_osl)
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language = Python, caption = Transformacja współrzędnych, label = petla]
+  # Azymut
+  azimuths = []
+  azimuths_o = []
+  azimuths_waw = []
+  azimuths_osl = []
+  # Odległość od lotniska
+  distance = []
+  distance_o = []
+  distance_waw = []
+  distance_osl = []
+  # Wysokość
+  height = []
+  height_waw = []
+  height_osl = []
+  # Czas
+  time_waw = []
+  time_osl = []
+  
+  # Warszawa 
+  for flh in wspolrzedne_lot:
+      xyz_samolotu = orto(np.deg2rad(flh[0]), np.deg2rad(flh[1]), flh[2])
+      wektor_samolot_lotnisko = np.array([xyz_samolotu[0] - xyz_waw[0], xyz_samolotu[1] - xyz_waw[1], xyz_samolotu[2] - xyz_waw[2]])
+      neu = R_waw.T@wektor_samolot_lotnisko
+      h = np.arcsin(np.clip(neu[2] / np.sqrt(neu[0]**2 + neu[1]**2 + neu[2]**2), -1, 1))
+      h = np.degrees(h)
+      height.append(h)
+  
+      az = np.arctan2(neu[1], neu[0])
+      azimuths.append(az)
+  
+      dist = np.sqrt(neu[0]**2 + neu[1]**2 + neu[2]**2) / 1000
+      distance.append(dist)
+  
+      if h > 0:
+          height_waw.append(h)
+          distance_waw.append(dist)
+          azimuths_waw.append(az)
+          time_waw.append(flh[2])
+  
+  # Oslo
+  for flh in wspolrzedne_lot:
+      xyz_samolotu = orto(np.deg2rad(flh[0]), np.deg2rad(flh[1]), flh[2])
+      wektor_samolot_lotnisko = np.array([xyz_samolotu[0] - xyz_osl[0], xyz_samolotu[1] - xyz_osl[1], xyz_samolotu[2] - xyz_osl[2]])
+      neu = R_osl.T @ wektor_samolot_lotnisko
+  
+      h = np.arcsin(np.clip(neu[2] / np.sqrt(neu[0]**2 + neu[1]**2 + neu[2]**2), -1, 1))
+      h = np.degrees(h)
+  
+      az = np.arctan2(neu[1], neu[0])
+      az = az if az >= 0 else az + 360
+      azimuths_o.append(az)
+      
+      dist = np.sqrt(neu[0]**2 + neu[1]**2 + neu[2]**2) / 1000
+      distance_o.append(dist)
+  
+      if h > 0:
+          height_osl.append(h)
+          distance_osl.append(dist)
+          azimuths_osl.append(az)
+          time_osl.append(flh[2])
+  
+  # Tablica współrzędnych i czasu
+  data_waw = np.column_stack((azimuths_waw, np.array(height_waw), np.array(distance_waw), np.array(time_waw)))
+  data_osl = np.column_stack((azimuths_osl, np.array(height_osl), np.array(distance_osl), np.array(time_osl)))
+  
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language = Python, caption = Mapy lotu, label = mapy]
+  # Linia geodezyjna lotu
+  fig = plt.figure(figsize=(10, 5))
+  ax = plt.axes(projection=ccrs.Robinson())
+  request = cimgt.OSM()
+  ax.add_image(request, 6)
+  ax.stock_img()
+  ax.coastlines()
+  # ax.plot(wspolrzedne_lot[:,1], wspolrzedne_lot[:,0],transform=ccrs.PlateCarree(),color='b')
+  ax.plot([wspol_waw[1], wspol_osl[1]], [wspol_waw[0], wspol_osl[0]], transform=ccrs.Geodetic(), color='r')
+  extent = [-5, 35, 50, 65]
+  ax.set_extent(extent)
+
+  # Mapa lokalizacji samolotu
+  fig = px.scatter_geo(wspolrzedne_lot,
+          lat=wspolrzedne_lot[:, 0], 
+          lon=wspolrzedne_lot[:, 1], 
+          color = time_lot, size = 1, 
+          title = 'Zarejestrowane współrzędne samolotu', 
+          hover_name = time_lot, 
+          projection="orthographic")
+  fig.update_geos(fitbounds="locations")
+  fig.update_layout(width = 1000, height = 1000)
+  fig.show()
+
+  # Trasa lotu
+  fig = go.Figure(data=go.Scattergeo(
+          lon = wspolrzedne_lot[:, 1],
+          lat = wspolrzedne_lot[:, 0],
+          mode = 'lines',
+          line = dict(width = 2, color = 'blue')))
+  fig.update_geos(fitbounds="locations")
+  fig.update_layout(title = 'LOT4YH', width = 2000, height = 1000)
+
+  # Etykiety lotnisk
+  fig.add_trace(go.Scattergeo(
+          lon = [wspolrzedne_lot[0, 1], wspolrzedne_lot[-1, 1]],
+          lat = [wspolrzedne_lot[0, 0], wspolrzedne_lot[-1, 0]],
+          mode = 'markers + text',
+          marker = dict(size = 10, color = 'navy'),
+          text = ['WAW'],
+          textposition="top center"))
+  fig.add_trace(go.Scattergeo(
+          lon = [wspolrzedne_lot[-1, 1], wspolrzedne_lot[-1, 1]],
+          lat = [wspolrzedne_lot[-1, 0], wspolrzedne_lot[-1, 0]],
+          mode = 'markers + text',
+          marker = dict(size = 10, color = 'navy'),
+          text = ['OSL'],
+          textposition="top center"))
+  fig.show()
+
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language = Python, caption = Wykresy Skyplot pokazujące znikanie i pojawianie się samolotu nad horyzontem, label = skyplot]
+  for data in (data_waw, data_osl):
+    # Skyplot z elewacją punkty 
+    fig, ax = plt.subplots()
+    ax = plt.axes(projection = 'polar')
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+    ax.set_xlabel('Azymut [deg]')
+    ax.set_ylabel('Wysokość [deg]')
+    sc = ax.scatter(data[:,0], data[:,1], c = data[:,3], cmap = 'viridis')
+    ax.set_title('Elewacja od lotniska od azymutu')
+
+    # Skyplot z elewacją w postaci linii geodezyjnej 
+    fig, ax = plt.subplots()
+    ax = plt.axes(projection = 'polar')
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+    ax.set_xlabel('Azymut [deg]')
+    ax.set_ylabel('Wysokość [deg]')
+    ax.plot(data[:,0], data[:,1], color = 'blue')
+    ax.set_title('Elewacja od lotniska od azymutu')
+
+    # Skyplot z odległością punkty 
+    fig, ax = plt.subplots()
+    ax = plt.axes(projection = 'polar')
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+    ax.set_xlabel('Azymut [deg]')
+    ax.set_ylabel('Odległość [km]')
+    #sc = ax.scatter(azimuths, distance, color = 'blue') 
+    sc = ax.scatter(data[:,0], data[:,2], c = data[:,3], cmap = 'viridis')
+    ax.set_title('Odległość od lotniska od azymutu')
+
+  # Skyplot z odległością w postaci linii geodezyjnej - WAW
+  fig, ax = plt.subplots()
+  ax = plt.axes(projection = 'polar')
+  ax.set_theta_zero_location('N')
+  ax.set_theta_direction(-1)
+  ax.grid(True)
+  ax.plot(azimuths, distance, color = 'blue')
+  ax.plot(data_waw[:,0], data_waw[:,2], color = 'red')
+  ax.set_xlabel('Azymut [deg]')
+  ax.set_ylabel('Odległość [km]')
+  ax.set_title('Odległość od lotniska WAW od azymutu')
+
+  # Skyplot z odległością w postaci linii geodezyjnej - OSL
+  fig, ax = plt.subplots()
+  ax = plt.axes(projection = 'polar')
+  ax.set_theta_zero_location('N')
+  ax.set_theta_direction(-1)
+  ax.grid(True)
+  ax.plot(azimuths_o, distance_o, color = 'blue')
+  ax.plot(data_osl[:,0], data_osl[:,2], color = 'red')
+  ax.set_xlabel('Azymut [deg]')
+  ax.set_ylabel('Odległość [km]')
+  ax.set_title('Odległość od lotniska OSL od azymutu')
+
+  plt.show()
+
+  print('Odległość w momencie zniknięcia: ', data_waw[-1, 2], 'km')
+  print('Odległość w momencie pojawienia się: ', data_osl[1, 2], 'km')
+
+  print('Czas lotu: ', flight_time)
+  print('Długość trasy: ', distance[-1], 'km')
+  print('Wysokość maksymalna: ', np.max(wspolrzedne_lot[:, 2])/1000, 'km')
+  
+  print('Prędkość średnia: ', distance[-1] / (flight_time.total_seconds()/3600), 'km/h')
+  print('Prędkość maksymalna: ', np.max(speed_lot), 'km/h')
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Wykresy położenia samolotu od czasu, label = wykresy]
+  # Wysokośc od czasu
+  fig, ax = plt.subplots()
+  ax.plot(datetime_time_lot, wspolrzedne_lot[:, 2]/1000, color = 'red')
+  ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+  ax.grid(True)
+  ax.set_xlabel('Godzina [hh:mm]')
+  ax.set_ylabel('Wysokość [km]')
+  ax.set_title('Wysokość samolotu w funkcji czasu')
+  
+  # Prędkość lotu od czasu
+  fig, ax = plt.subplots()
+  ax.plot(datetime_time_lot, speed_lot, color = 'orange')
+  ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+  ax.grid(True)
+  ax.set_xlabel('Godzina [h:min]')
+  ax.set_ylabel('Prędkość [km/h]')
+  ax.set_title('Prędkość samolotu w funkcji czasu')
+
+  # Elewacja od godziny
+  fig, ax = plt.subplots()
+  ax.plot(datetime_time_lot, height, color = 'green')
+  ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+  ax.grid(True)
+  ax.set_xlabel('Godzina [h:min]')
+  ax.set_ylabel('Wysokość [deg]')
+  ax.set_title('Wysokość kątowa samolotu w funkcji czasu')
+  
+  # Odległość od godziny
+  fig, ax = plt.subplots()
+  ax.plot(datetime_time_lot, distance, color = 'blue')
+  ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+  ax.grid(True)
+  ax.set_xlabel('Godzina [h:min]')
+  ax.set_ylabel('Odelgłość [km]')
+  ax.set_title('Odległość samolotu od lotniska WAW w funkcji czasu')
+\end{lstlisting}
+
+\newpage
+\listoftables
+\listoffigures
+\lstlistoflistings
+
+\end{document}
